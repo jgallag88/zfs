@@ -61,6 +61,7 @@ $(MODULE)-objs += mmp.o
 $(MODULE)-objs += multilist.o
 $(MODULE)-objs += pathname.o
 $(MODULE)-objs += policy.o
+$(MODULE)-objs += procfs_list.o
 $(MODULE)-objs += range_tree.o
 $(MODULE)-objs += refcount.o
 $(MODULE)-objs += rrwlock.o

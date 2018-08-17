@@ -653,6 +653,11 @@ tags = ['functional', 'poolversion']
 tests = ['privilege_001_pos', 'privilege_002_pos']
 tags = ['functional', 'privilege']
 
+[tests/functional/procfs]
+tests = ['procfs_list_basic', 'procfs_list_concurrent_readers',
+    'procfs_list_stale_read']
+tags = ['functional', 'procfs']
+
 [tests/functional/projectquota]
 tests = ['projectid_001_pos', 'projectid_002_pos', 'projectid_003_pos',
     'projectquota_001_pos', 'projectquota_002_pos', 'projectquota_003_pos',

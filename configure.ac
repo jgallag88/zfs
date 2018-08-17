@@ -298,6 +298,7 @@ AC_CONFIG_FILES([
 	tests/zfs-tests/tests/functional/pool_checkpoint/Makefile
 	tests/zfs-tests/tests/functional/poolversion/Makefile
 	tests/zfs-tests/tests/functional/privilege/Makefile
+	tests/zfs-tests/tests/functional/procfs/Makefile
 	tests/zfs-tests/tests/functional/projectquota/Makefile
 	tests/zfs-tests/tests/functional/pyzfs/Makefile
 	tests/zfs-tests/tests/functional/quota/Makefile

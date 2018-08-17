@@ -882,6 +882,10 @@ kobj_get_filesize(struct _buf *file, uint64_t *size)
  */
 
 void
+seq_printf(struct seq_file *m, const char *fmt, ...)
+{}
+
+void
 delay(clock_t ticks)
 {
 	(void) poll(0, 0, ticks * (1000 / hz));

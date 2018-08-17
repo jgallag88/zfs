@@ -84,6 +84,7 @@ KERNEL_C = \
 	mmp.c \
 	multilist.c \
 	pathname.c \
+	procfs_list.c \
 	range_tree.c \
 	refcount.c \
 	rrwlock.c \

@@ -46,6 +46,7 @@ SUBDIRS = \
 	pool_names \
 	poolversion \
 	privilege \
+	procfs \
 	projectquota \
 	quota \
 	raidz \
