@@ -61,6 +61,9 @@
 #include <sys/zio_compress.h>
 #include <zfs_fletcher.h>
 #include <sys/zio_checksum.h>
+#ifdef _KERNEL
+#include <linux/delay.h>
+#endif
 
 /*
  * The SPA supports block sizes up to 16MB.  However, very large blocks
@@ -714,6 +717,49 @@ dsl_dataset_own(dsl_pool_t *dp, const char *name, ds_hold_flags_t flags,
 	return (0);
 }
 
+#ifdef _KERNEL
+#define CURRENT_COMM (current->comm)
+#else
+#define CURRENT_COMM ""
+#endif
+
+#define PRINT_BUF_SIZE	256
+int
+print_ds_name(char *buf, dsl_dir_t *dsl_dir)
+{
+
+	int len;
+	if (dsl_dir->dd_parent)
+		len = print_ds_name(buf, dsl_dir->dd_parent);
+	else
+		len = 0;
+
+	//return strncpy(buf + len, dsl_dir->dd_myname, PRINT_BUF_SIZE - len - 1) - buf;
+	return snprintf(buf + len, PRINT_BUF_SIZE - len - 1, "%s%s", len ? "/" : "", dsl_dir->dd_myname) + len;
+}
+
+void
+print_tag(char *buf, void *tag)
+{
+	if (!tag) {
+		buf[0] = '\0';
+		return;
+	}
+
+	for (int i=0; i<64; i++) {
+		char c = ((char *)tag)[i];
+		if (c == '\0')
+			break;
+
+		if (!isprint(c) && !isspace(c)) {
+			snprintf(buf, PRINT_BUF_SIZE - 1, "%llx", (unsigned long long)tag);
+			return;
+		}
+	}
+
+	snprintf(buf, PRINT_BUF_SIZE - 1, "%s", (char*)tag);
+}
+
 /*
  * See the comment above dsl_pool_hold() for details.  In summary, a long
  * hold is used to prevent destruction of a dataset while the pool hold
@@ -726,6 +772,20 @@ dsl_dataset_own(dsl_pool_t *dp, const char *name, ds_hold_flags_t flags,
 void
 dsl_dataset_long_hold(dsl_dataset_t *ds, void *tag)
 {
+	char ds_name[PRINT_BUF_SIZE];
+	char tag_str[PRINT_BUF_SIZE];
+	if (ds->ds_dir)
+		print_ds_name(ds_name, ds->ds_dir);
+	else
+		ds_name[0] = '\0';
+	print_tag(tag_str, tag);
+	zfs_dbgmsg("Holding dataset name=%s snapname=%s ds=%px tag=%s comm=%s\n",
+		ds_name,
+		ds->ds_snapname,
+		ds,
+		tag_str,
+		CURRENT_COMM);
+
 	ASSERT(dsl_pool_config_held(ds->ds_dir->dd_pool));
 	(void) refcount_add(&ds->ds_longholds, tag);
 }
@@ -733,6 +793,23 @@ dsl_dataset_long_hold(dsl_dataset_t *ds, void *tag)
 void
 dsl_dataset_long_rele(dsl_dataset_t *ds, void *tag)
 {
+#ifdef _KERNEL
+	mdelay(200);
+#endif
+	char ds_name[PRINT_BUF_SIZE];
+	char tag_str[PRINT_BUF_SIZE];
+	if (ds->ds_dir)
+		print_ds_name(ds_name, ds->ds_dir);
+	else
+		ds_name[0] = '\0';
+	print_tag(tag_str, tag);
+	zfs_dbgmsg("Releasing dataset name=%s snapname=%s ds=%px tag=%s comm=%s\n",
+		ds_name,
+		ds->ds_snapname,
+		ds,
+		tag_str,
+		CURRENT_COMM);
+
 	(void) refcount_remove(&ds->ds_longholds, tag);
 }
 
@@ -2587,6 +2664,20 @@ dsl_dataset_handoff_check(dsl_dataset_t *ds, void *owner, dmu_tx_t *tx)
 	if (!dmu_tx_is_syncing(tx))
 		return (0);
 
+	char ds_name[PRINT_BUF_SIZE];
+	char tag_str[PRINT_BUF_SIZE];
+	if (ds->ds_dir)
+		print_ds_name(ds_name, ds->ds_dir);
+	else
+		ds_name[0] = '\0';
+	print_tag(tag_str, owner);
+	zfs_dbgmsg("dsl_dataset_handoff_check name=%s snapname=%s ds=%px tag=%s comm=%s\n",
+		ds_name,
+		ds->ds_snapname,
+		ds,
+		tag_str,
+		CURRENT_COMM);
+
 	if (owner != NULL) {
 		VERIFY3P(ds->ds_owner, ==, owner);
 		dsl_dataset_long_rele(ds, owner);
@@ -2596,6 +2687,10 @@ dsl_dataset_handoff_check(dsl_dataset_t *ds, void *owner, dmu_tx_t *tx)
 
 	if (owner != NULL)
 		dsl_dataset_long_hold(ds, owner);
+
+	zfs_dbgmsg("dsl_dataset_handoff_check done retval=%d comm=%s\n",
+		held ? EBUSY : 0,
+		CURRENT_COMM);
 
 	if (held)
 		return (SET_ERROR(EBUSY));
