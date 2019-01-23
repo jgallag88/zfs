@@ -18,6 +18,7 @@ Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-zfsonlinux/zfs.git
 Package: zfs-modules-_KVERS_
 Architecture: _ARCH_
 Provides: zfs-modules, delphix-zfs-modules
+Conflicts: delphix-zfs-modules
 Depends: linux-image-_KVERS_
 Recommends: zfsutils
 Description: OpenZFS filesystem kernel modules for Linux (kernel _KVERS_)
@@ -40,6 +41,7 @@ Section: contrib/debian-installer
 Architecture: _ARCH_
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Provides: zfs-modules, zfs-modules-_KVERS_-udeb
+Conflicts: zfs-modules, zfs-modules-_KVERS_-udeb
 Description: OpenZFS filesystem kernel modules for Linux (debian-installar version for kernel _KVERS_)
  An advanced integrated volume manager and filesystem that is designed for
  performance and data integrity. Snapshots, clones, checksums, deduplication,
