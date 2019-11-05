@@ -1347,6 +1347,7 @@ typedef enum {
 	SPA_LOAD_CREATE		/* creation in progress */
 } spa_load_state_t;
 
+// TODO make sure that adding a value to this won't break anything
 typedef enum {
 	ZPOOL_WAIT_CKPT_DISCARD,
 	ZPOOL_WAIT_FREE,
@@ -1355,6 +1356,7 @@ typedef enum {
 	ZPOOL_WAIT_REMOVE,
 	ZPOOL_WAIT_RESILVER,
 	ZPOOL_WAIT_SCRUB,
+	ZPOOL_WAIT_TRIM,
 	ZPOOL_WAIT_NUM_ACTIVITIES
 } zpool_wait_activity_t;
 
